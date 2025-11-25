@@ -15,6 +15,7 @@ python -m vllm.entrypoints.openai.api_server \
   --gpu-memory-utilization 0.9 \
   --max-model-len 8192
 
+幫我注意一下如果你開在port 8000 底下的llm_base_url http://{ip位址}:{port} port的部分也要改
 -------------------------------------------------------------------------------------------------
 
 # =============== for 政翰、星瑀 懶人包 ===============
