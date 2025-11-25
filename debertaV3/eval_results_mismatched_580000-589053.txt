@@ -1,0 +1,9 @@
+accuracy = 0.8954434499593165
+accuracy_facetoface = 0.8844984802431611
+accuracy_letters = 0.9084471421345472
+accuracy_nineeleven = 0.898176291793313
+accuracy_oup = 0.8980112187659357
+accuracy_verbatim = 0.8879753340184995
+eval_loss = 0.7239375730774132
+eval_metric = 0.8954434499593165
+eval_samples = 9832
