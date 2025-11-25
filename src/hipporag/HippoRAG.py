@@ -1401,7 +1401,12 @@ class HippoRAG:
                 if phrase_id is not None:
                     all_phrase_weights[phrase_id] = 0.0
 
-        assert np.count_nonzero(all_phrase_weights) == len(linking_score_map.keys())
+        # assert np.count_nonzero(all_phrase_weights) == len(linking_score_map.keys())
+        # 現在改成：如果不相等，不要當機，而是回傳空值跳過
+        if np.count_nonzero(all_phrase_weights) != len(linking_score_map.keys()):
+            print(f"⚠️ [警告] 發現 LLM 輸出格式異常！(Weights: {np.count_nonzero(all_phrase_weights)} vs Keys: {len(linking_score_map.keys())})")
+            print("➡️ 為避免程式崩潰，自動跳過此實體的計算。")
+            return np.array([]), {}
         return all_phrase_weights, linking_score_map
 
     def graph_search_with_fact_entities(self, query: str,

@@ -21,9 +21,9 @@ def main():
         "Montebello is a part of Rockland County."
     ]
     config = BaseConfig(
-        save_dir='outputs',
-        llm_base_url="http://140.122.184.162:11434/api/tags",
-        llm_name="Llama-3.1-8B-Instruct",
+        save_dir='outputs/lab_ollama_test',
+        llm_base_url="http://140.122.184.162:11434",
+        llm_name="llama3.1", # 若要3.3:70B請改成 llama3.3
         embedding_model_name='nvidia/NV-Embed-v2',
         rerank_dspy_file_path="src/hipporag/prompts/dspy_prompts/filter_llama3.3-70B-Instruct.json",
         retrieval_top_k=200,
@@ -67,12 +67,6 @@ def main():
     print(hipporag.rag_qa(queries=queries,
                                   gold_docs=gold_docs,
                                   gold_answers=answers)[-2:])
-
-    # Startup a HippoRAG instance
-    hipporag = HippoRAG(global_config=config)   
-                        # azure_endpoint="https://bernal-hipporag.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview",
-                        # azure_embedding_endpoint="https://bernal-hipporag.openai.azure.com/openai/deployments/text-embedding-3-small/embeddings?api-version=2023-05-15"
-                        # )
 
     print(hipporag.rag_qa(queries=queries,
                                   gold_docs=gold_docs,
