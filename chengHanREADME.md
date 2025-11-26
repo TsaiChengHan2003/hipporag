@@ -1,9 +1,3 @@
-dataset=sample
-dataset=2wikimultihopqa
-dataset=hotpotqa
-dataset=musique
-
-
 ------如果要開vllm模式使llama 3.1:8B性能加倍 得去hugginface下載加速版 但70B的不可能跑得動 流程如下-----
 1. https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct 填寫問卷等他批准
 2. 下指令 hugginface login 去拿你的access token
@@ -43,6 +37,14 @@ python main.py --dataset $dataset --llm_base_url http://192.168.1.156:11434 --ll
 # 目前已知有架設llama的機器
 140.122.184.162:11434 有 llama3.1 8B
 192.168.1.156:11434 bigram 好像全都有 (碩1生好像連不進去 防火牆有擋的樣子，我跟星瑀進不去)
+
+# dataset
+dataset=sample
+dataset=test2Wiki
+dataset=2wikimultihopqa
+dataset=hotpotqa
+dataset=musique
+
 
 # Run OpenAI reproduce
 python main.py --dataset $dataset --llm_base_url https://api.openai.com/v1 --llm_name gpt-4o-mini --embedding_name nvidia/NV-Embed-v2

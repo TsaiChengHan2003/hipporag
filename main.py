@@ -82,15 +82,6 @@ def main():
     parser.add_argument('--save_dir', type=str, default='outputs', help='Save directory')
     args = parser.parse_args()
 
-    remaing_token = countTokens()
-    if isEnoughTokens(args.dataset):
-        print("tokens 仍夠用")
-    else:
-        print("❌ Tokens 不足，實驗終止。")
-        print(f"剩餘{remaing_token:,}",)
-        return
-
-    
     dataset_name = args.dataset
     save_dir = args.save_dir
     llm_base_url = args.llm_base_url

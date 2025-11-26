@@ -561,8 +561,10 @@ class HippoRAG:
         if not self.ready_to_retrieve:
             self.prepare_retrieval_objects()
 
+        # 將query轉為embeddings
         self.get_query_embeddings(queries)
 
+        # 宣告儲存的檢索到的結果
         retrieval_results = []
 
         for q_idx, query in tqdm(enumerate(queries), desc="Retrieving", total=len(queries)):
@@ -1271,6 +1273,9 @@ class HippoRAG:
             elif query not in self.query_to_embedding['triple'] or query not in self.query_to_embedding['passage']:
                 all_query_strings.append(query)
 
+
+        # 這邊在處理 將offline 的 embedding 注入進來，好在後續使用
+        # 不管是 Query-to-fact(事實) 還是 Query-to-passage(段落) 都要注入
         if len(all_query_strings) > 0:
             # get all query embeddings
             logger.info(f"Encoding {len(all_query_strings)} queries for query_to_fact.")

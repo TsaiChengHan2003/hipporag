@@ -68,10 +68,6 @@ def main():
                                   gold_docs=gold_docs,
                                   gold_answers=answers)[-2:])
 
-    print(hipporag.rag_qa(queries=queries,
-                                  gold_docs=gold_docs,
-                                  gold_answers=answers)[-2:])
-
     new_docs = [
         "Tom Hort's birthplace is Montebello.",
         "Sam Hort's birthplace is Montebello.",
