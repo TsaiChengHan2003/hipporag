@@ -405,18 +405,30 @@ class HippoRAG:
         self.get_query_embeddings(queries)
 
         retrieval_results = []
-
+        
+        # ★ 關鍵判斷點 ★
         for q_idx, query in tqdm(enumerate(queries), desc="Retrieving", total=len(queries)):
             rerank_start = time.time()
+            # 第一次開始計算分數的地方，拿到 query 的 fact scores
             query_fact_scores = self.get_fact_scores(query)
+            
+            # 根據query與offline內部的embedding做完相關性後給LLM進行剔除
             top_k_fact_indices, top_k_facts, rerank_log = self.rerank_facts(query, query_fact_scores)
+            
+            # rerank_log 可以看到LLM 篩選前 篩選後的差異
+            print(rerank_log)
+            input(">>> [PAUSED] 請按 Enter 鍵繼續執行下一步...")
+            
+            
             rerank_end = time.time()
 
             self.rerank_time += rerank_end - rerank_start
-
+            
+            # 情況 A：找不到有效事實 -> 啟動備案 (DPR) => 暴力的從cosine similarity算 => 回傳該矩陣
             if len(top_k_facts) == 0:
                 logger.info('No facts found after reranking, return DPR results')
                 sorted_doc_ids, sorted_doc_scores = self.dense_passage_retrieval(query)
+            # 情況 B：找到了有效事實 -> 啟動圖搜尋 (Graph Search)、透過LLM過濾出的fact節點、在這裏面會有PPR的演算法 => 回傳該矩陣
             else:
                 sorted_doc_ids, sorted_doc_scores = self.graph_search_with_fact_entities(query=query,
                                                                                          link_top_k=self.global_config.linking_top_k,
@@ -424,7 +436,7 @@ class HippoRAG:
                                                                                          top_k_facts=top_k_facts,
                                                                                          top_k_fact_indices=top_k_fact_indices,
                                                                                          passage_node_weight=self.global_config.passage_node_weight)
-
+            # A 與 B 搜尋結果
             top_k_docs = [self.chunk_embedding_store.get_row(self.passage_node_keys[idx])["content"] for idx in sorted_doc_ids[:num_to_retrieve]]
 
             retrieval_results.append(QuerySolution(question=query, docs=top_k_docs, doc_scores=sorted_doc_scores[:num_to_retrieve]))
@@ -1148,7 +1160,14 @@ class HippoRAG:
         graph_info["num_total_triples"] = len(self.node_to_node_stats)
 
         return graph_info
-
+    ##########################################################################################
+    # 將資料（Embedding, 圖結構, 索引）加載到記憶體 (In-Memory) 中，建立對照表 (Mappings)，確保系統已經準備好可以隨時接受使用者的 Query。
+    # 1. 載入 Key 檢查圖的完整性
+    # 2. 建立索引對照表 (Index Mapping)
+    # 3. 載入 Embedding
+    # 4. 載入 OpenIE 結果
+    # 5. 建立 Triple -> Document 對照表
+    ##########################################################################################
     def prepare_retrieval_objects(self):
         """
         Prepares various in-memory objects and attributes necessary for fast retrieval processes, such as embedding data and graph relationships, ensuring consistency
@@ -1266,15 +1285,17 @@ class HippoRAG:
 
         all_query_strings = []
         for query in queries:
+            # 這邊比較像是offline流程在跑的
             if isinstance(query, QuerySolution) and (
-                    query.question not in self.query_to_embedding['triple'] or query.question not in
-                    self.query_to_embedding['passage']):
+                    query.question not in self.query_to_embedding['triple'] or 
+                    query.question not in self.query_to_embedding['passage']):
                 all_query_strings.append(query.question)
+            # 這邊比較像是online流程在跑的
             elif query not in self.query_to_embedding['triple'] or query not in self.query_to_embedding['passage']:
                 all_query_strings.append(query)
 
 
-        # 這邊在處理 將offline 的 embedding 注入進來，好在後續使用
+        # 這邊在處理 將offline 建立的 embedding 注入進來，好在後續使用
         # 不管是 Query-to-fact(事實) 還是 Query-to-passage(段落) 都要注入
         if len(all_query_strings) > 0:
             # get all query embeddings
